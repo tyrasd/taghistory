@@ -1,0 +1,27 @@
+{
+  "name": "taghistory",
+  "authors": [
+    "Martin Raifer <tyr.asd@gmail.com>"
+  ],
+  "description": "graphs about historic osm tag usage",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "osm",
+    "tags",
+    "taginfo"
+  ],
+  "license": "ISC",
+  "homepage": "http://tyrasd.github.io/taghistory",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vega": "^2.6.1"
+  }
+}

@@ -1,0 +1,144 @@
+<html>
+<head>
+  <title>osm tag history</title>
+  <script src="bower_components/d3/d3.min.js"></script>
+  <script src="bower_components/vega/vega.js"></script>
+</head>
+<body>
+  <form id="form">
+    <select id="type">
+      <option>node</option>
+      <option>way</option>
+      <option>relation</option>
+    </select>
+    <input type="text" id="key" placeholder="key" maxlength="255" />
+    <input type="text" id="value" placeholder="value" maxlength="255" />
+    <input type="submit" value="add tag" />
+  </form>
+  <div id="chart" class="view"></div>
+  <script>
+    var today = +(new Date());
+    var osmBirth = +(new Date("2004-08-09T00:00:00Z"));
+    var spec = {
+      "width": 1000,
+      "height": 600,
+      "padding": {"top": 10, "left": 10, "bottom": 30, "right": 60},
+      "data": [
+        {
+          "name": "tags",
+          "values": [],
+          //"format": {"type": "json", "parse": {"date":"date"}}
+        }
+      ],
+      "scales": [
+        {
+          "name": "x",
+          "type": "time",
+          "range": "width",
+          "zero": false,
+          "domain": [osmBirth, today]
+        },
+        {
+          "name": "y",
+          "type": "linear",
+          //"type": "log",
+          "range": "height",
+          "nice": true,
+          "domain": {"data": "tags", "field": "count"}
+          //"domain": [1, 1E8]
+        },
+        {
+          "name": "color",
+          "type": "ordinal",
+          "domain": {"data": "tags", "field": "tag"},
+          "range": "category10"
+        }
+      ],
+      "axes": [
+        {"type": "x", "scale": "x", "ticks": 15},
+        {"type": "y", "scale": "y", "orient": "right"}
+      ],
+      "marks": [
+        {
+          "type": "group",
+          "from": {
+            "data": "tags",
+            "transform": [{"type": "facet", "groupby": ["tag"]}]
+          },
+          "marks": [
+            {
+              "type": "line",
+              "properties": {
+                "enter": {
+                  "interpolate": {"value": "step-after"},
+                  "strokeWidth": 2
+                },
+                "update": {
+                  "x": {"scale": "x", "field": "date"},
+                  "y": {"scale": "y", "field": "count"},
+                  "stroke": {"scale": "color", "field": "tag"}
+                  //"stroke": {"value": "red"}
+                }
+              }
+            },
+            {
+              "type": "text",
+              "from": {
+                "transform": [{"type": "filter", "test": "datum.date == "+today}]
+              },
+              "properties": {
+                "enter": {
+                  "baseline": {"value": "middle"},
+                  "align": {"value": "right"}
+                },
+                "update": {
+                  "x": {"scale": "x", "field": "date", "offset": -10},
+                  "y": {"scale": "y", "field": "count", "offset": -10},
+                  "fill": {"scale": "color", "field": "tag"},
+                  "text": {"field": "tag"}
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    var view;
+    vg.parse.spec(spec, function(chart) {
+      view = chart({el:"#chart", renderer: 'svg', data:[]});
+      view.update();
+    });
+
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var type  = document.getElementById('type').value;
+      var key   = document.getElementById('key').value;
+      var value = document.getElementById('value').value;
+      var encodedTag = encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
+      fetch("http://taghistory.raifer.tech/"+encodedTag)
+      .then(function(d) { return d.json(); })
+      .then(function(d) {
+        console.log(d);
+        d.forEach(function(r) {
+          r.tag = encodedTag;
+          r.date = +(new Date(r.date));
+        });
+        d.unshift({
+          tag: encodedTag,
+          date: osmBirth,
+          delta: 0,
+          count: 0
+        });
+        d.push({
+          tag: encodedTag,
+          date: today,
+          delta: 0,
+          count: d[d.length-1].count
+        });
+        view.data('tags').insert(d);
+        view.update();
+      });
+    })
+
+  </script>
