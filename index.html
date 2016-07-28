@@ -26,7 +26,8 @@
       "data": [
         {
           "name": "tags",
-          "values": []
+          "values": [],
+          "transform": [{"type": "facet", "groupby": ["tag"]}]
         }
       ],
       "signals": [
@@ -152,6 +153,12 @@
           }]
         },
         {
+          "name": "globalMaxY",
+          "init": 10,
+          "verbose": true,
+          "streams": []
+        },
+        {
           "name": "xMin",
           "init": osmBirth,
           "streams": [
@@ -183,12 +190,12 @@
         },
         {
           "name": "yMax",
-          "init": 1e6,
+          "init": 10, // ???
           "streams": [
             {"type": "delta", "expr": "ys.max + (ys.max-ys.min)*delta.y/height"},
             {"type": "zoom", "expr": "(ys.max-yAnchor)*zoom + yAnchor"},
             {"type": "brush_end", "expr": "max(brush_start.y, brush.y)"},
-            {"type": "reset", "expr": 1e6}
+            {"type": "reset", "expr": "globalMaxY"}
           ]
         }
       ],
@@ -235,10 +242,8 @@
               "clip": {"value": true}
             }
           },
-          "clip": {"value": true},
           "from": {
-            "data": "tags",
-            "transform": [{"type": "facet", "groupby": ["tag"]}]
+            "data": "tags"
           },
           "marks": [
             {
@@ -252,24 +257,6 @@
                   "x": {"scale": "x", "field": "date"},
                   "y": {"scale": "y", "field": "count"},
                   "stroke": {"scale": "color", "field": "tag"}
-                }
-              }
-            },
-            {
-              "type": "text",
-              "from": {
-                "transform": [{"type": "filter", "test": "datum.date == "+today}]
-              },
-              "properties": {
-                "enter": {
-                  "baseline": {"value": "middle"},
-                  "align": {"value": "right"}
-                },
-                "update": {
-                  "x": {"scale": "x", "field": "date", "offset": -10},
-                  "y": {"scale": "y", "field": "count", "offset": -10},
-                  "fill": {"scale": "color", "field": "tag"},
-                  "text": {"field": "tag"}
                 }
               }
             }
@@ -300,13 +287,30 @@
             "update": {
               "text": {"value": "(reset zoom)"},
               "x": {"value": 30},
-              "y": {"value": 30},
+              "y": {"value": 16},
               "fill": {"value": "grey"},
               "fillOpacity": {"signal": "resetable"},
               "fontSize": {"value": 14}
             }
           }
         },
+      ],
+      "legends": [
+        {
+          "fill": "color",
+          "properties": {
+            "legend": {
+              "x": {"value": 16},
+              "y": {"value": 30}
+            },
+            "labels": {
+              "fontSize": {"value": 14}
+            },
+            "symbols": {
+              "stroke": {"value": "transparent"}
+            }
+          }
+        }
       ]
     };
 
@@ -342,6 +346,10 @@
           count: d[d.length-1].count
         });
         view.data('tags').insert(d);
+        var newMax = d.reduce(function(acc, r) { return Math.max(acc,r.count); }, 0);
+        view.signal('globalMaxY', Math.max(newMax*1.05, view.signal('globalMaxY')));
+        // trigger chart reset if it hasn't been zoomed yet
+        if (view.signal('resetable') == 0) view.signal('reset', Math.random());
         view.update();
       });
     })
