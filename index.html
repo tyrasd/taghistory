@@ -26,8 +26,96 @@
       "data": [
         {
           "name": "tags",
-          "values": [],
-          //"format": {"type": "json", "parse": {"date":"date"}}
+          "values": []
+        }
+      ],
+      "signals": [
+        {
+          "name": "delta_start",
+          "init": 0,
+          "streams": [{
+            "type": "mousedown",
+            "expr": "{x: eventX(), y: eventY()}"
+          }]
+        },
+        {
+          "name": "delta",
+          "init": 0,
+          "streams": [{
+            "type": "[mousedown, window:mouseup] > window:mousemove",
+            "expr": "{x: delta_start.x - eventX(), y: eventY() - delta_start.y}"
+          }]
+        },
+        {
+          "name": "xAnchor",
+          "init": 0,
+          "streams": [{
+            "type": "mousemove",
+            "expr": "+datetime(iscale('x', clamp(eventX(), 0, width)))"
+          }]
+        },
+        {
+          "name": "yAnchor",
+          "init": 0,
+          "streams": [{
+            "type": "mousemove",
+            "expr": "eventY()",
+            "scale": {"name":"y", "invert":true}
+          }]
+        },
+        {
+          "name": "zoom",
+          "init": 1.0,
+          "verbose": true,
+          "streams": [
+            {"type": "wheel", "expr": "pow(1.01, event.deltaY*pow(16, event.deltaMode))"}
+          ]
+        },
+        {
+          "name": "xs",
+          "streams": [{
+            "type": "mousedown, mouseup, wheel",
+            "expr": "{min: xMin, max: xMax}"}
+          ]
+        },
+        {
+          "name": "ys",
+          "streams": [{
+            "type": "mousedown, mouseup, wheel",
+            "expr": "{min: yMin, max: yMax}"
+          }]
+        },
+        {
+          "name": "xMin",
+          "init": osmBirth,
+          "streams": [
+            {"type": "delta", "expr": "max(+datetime(xs.min + (xs.max-xs.min)*delta.x/width), "+osmBirth+")"},
+            {"type": "zoom", "expr": "max(+datetime((xs.min-xAnchor)*zoom + xAnchor), "+osmBirth+")"}
+          ]
+        },
+        {
+          "name": "xMax",
+          "init": today,
+          "streams": [
+            {"type": "delta", "expr": "min(+datetime(xs.max + (xs.max-xs.min)*delta.x/width), "+today+")"},
+            {"type": "zoom", "expr": "min(+datetime((xs.max-xAnchor)*zoom + xAnchor), "+today+")"}
+          ]
+        },
+        {
+          "name": "yMin",
+          "init": 0,
+          "streams": [
+            {"type": "delta", "expr": "max(0, ys.min + (ys.max-ys.min)*delta.y/height)"},
+            {"type": "zoom", "expr": "max(0, (ys.min-yAnchor)*zoom + yAnchor)"}
+          ]
+        },
+        {
+          "name": "yMax",
+          "init": 1e6,
+          "streams": [
+            {"type": "delta", "expr": "ys.max + (ys.max-ys.min)*delta.y/height"},
+            {"type": "zoom", "expr": "(ys.max-yAnchor)*zoom + yAnchor"}
+          ]
         }
       ],
       "scales": [
@@ -36,16 +124,19 @@
           "type": "time",
           "range": "width",
           "zero": false,
-          "domain": [osmBirth, today]
+          "domainMin": {"signal": "xMin"},
+          "domainMax": {"signal": "xMax"}
         },
         {
           "name": "y",
           "type": "linear",
           //"type": "log",
           "range": "height",
-          "nice": true,
-          "domain": {"data": "tags", "field": "count"}
-          //"domain": [1, 1E8]
+          "nice": !true,
+          "zero": false,
+          //"domain": {"data": "tags", "field": "count"}
+          "domainMin": {"signal": "yMin"},
+          "domainMax": {"signal": "yMax"}
         },
         {
           "name": "color",
@@ -55,12 +146,22 @@
         }
       ],
       "axes": [
-        {"type": "x", "scale": "x", "ticks": 15},
-        {"type": "y", "scale": "y", "orient": "right"}
+        {"type": "x", "scale": "x", "grid": true, "ticks": 15},
+        {"type": "y", "scale": "y", "grid": true, "orient": "right"}
       ],
       "marks": [
         {
           "type": "group",
+          "properties": {
+            "enter": {
+              "x": {"value": 0},
+              "width": {"field": {"group": "width"}},
+              "y": {"value": 0},
+              "height": {"field": {"group": "height"}},
+              "clip": {"value": true}
+            }
+          },
+          "clip": {"value": true},
           "from": {
             "data": "tags",
             "transform": [{"type": "facet", "groupby": ["tag"]}]
@@ -77,7 +178,6 @@
                   "x": {"scale": "x", "field": "date"},
                   "y": {"scale": "y", "field": "count"},
                   "stroke": {"scale": "color", "field": "tag"}
-                  //"stroke": {"value": "red"}
                 }
               }
             },
@@ -119,7 +219,6 @@
       fetch("http://taghistory.raifer.tech/"+encodedTag)
       .then(function(d) { return d.json(); })
       .then(function(d) {
-        console.log(d);
         d.forEach(function(r) {
           r.tag = encodedTag;
           r.date = +(new Date(r.date));
