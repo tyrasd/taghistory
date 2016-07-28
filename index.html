@@ -31,10 +31,59 @@
       ],
       "signals": [
         {
+          "name": "shift",
+          "init": false,
+          "verbose": true,
+          "streams": [
+            {"type": "window:keydown, window:keyup", "expr": "event.shiftKey"
+          }]
+        },
+        {
+          "name": "brush_start",
+          "init": {},
+          "streams": [{
+            "type": "mousedown[shift]",
+            "expr": "{x: iscale('x', clamp(eventX(), 0, width)), y: iscale('y', clamp(eventY(), 0, height))}"
+          }]
+        },
+        {
+          "name": "brush",
+          "init": {},
+          "streams": [{
+            "type": "mousedown[shift], [mousedown[shift], window:mouseup] > window:mousemove",
+            "expr": "{x: iscale('x', clamp(eventX(), 0, width)), y: iscale('y', clamp(eventY(), 0, height))}"
+          }]
+        },
+        {
+          "name": "brush_end",
+          "init": 0,
+          "streams": [{
+            "type": "[mousedown[shift], mousedown[!shift]] > window:mouseup",
+            "expr": "random()"
+          }]
+        },
+        {
+          "name": "brush1",
+          "init": {},
+          "streams": [
+            {"type": "brush_start", "expr": "brush_start"},
+            {"type": "brush_end", "expr": "{x: 0, y: 0}"}
+          ]
+        },
+        {
+          "name": "brush2",
+          "init": {},
+          "streams": [
+            {"type": "brush", "expr": "brush"},
+            {"type": "brush_end", "expr": "{x: 0, y: 0}"}
+          ]
+        },
+
+        {
           "name": "delta_start",
           "init": 0,
           "streams": [{
-            "type": "mousedown",
+            "type": "mousedown[!shift]",
             "expr": "{x: eventX(), y: eventY()}"
           }]
         },
@@ -42,7 +91,7 @@
           "name": "delta",
           "init": 0,
           "streams": [{
-            "type": "[mousedown, window:mouseup] > window:mousemove",
+            "type": "[mousedown[!shift], window:mouseup] > window:mousemove",
             "expr": "{x: delta_start.x - eventX(), y: eventY() - delta_start.y}"
           }]
         },
@@ -90,7 +139,8 @@
           "init": osmBirth,
           "streams": [
             {"type": "delta", "expr": "max(+datetime(xs.min + (xs.max-xs.min)*delta.x/width), "+osmBirth+")"},
-            {"type": "zoom", "expr": "max(+datetime((xs.min-xAnchor)*zoom + xAnchor), "+osmBirth+")"}
+            {"type": "zoom", "expr": "max(+datetime((xs.min-xAnchor)*zoom + xAnchor), "+osmBirth+")"},
+            {"type": "brush_end", "expr": "min(brush_start.x, brush.x)"}
           ]
         },
         {
@@ -98,7 +148,8 @@
           "init": today,
           "streams": [
             {"type": "delta", "expr": "min(+datetime(xs.max + (xs.max-xs.min)*delta.x/width), "+today+")"},
-            {"type": "zoom", "expr": "min(+datetime((xs.max-xAnchor)*zoom + xAnchor), "+today+")"}
+            {"type": "zoom", "expr": "min(+datetime((xs.max-xAnchor)*zoom + xAnchor), "+today+")"},
+            {"type": "brush_end", "expr": "max(brush_start.x, brush.x)"}
           ]
         },
         {
@@ -106,7 +157,8 @@
           "init": 0,
           "streams": [
             {"type": "delta", "expr": "max(0, ys.min + (ys.max-ys.min)*delta.y/height)"},
-            {"type": "zoom", "expr": "max(0, (ys.min-yAnchor)*zoom + yAnchor)"}
+            {"type": "zoom", "expr": "max(0, (ys.min-yAnchor)*zoom + yAnchor)"},
+            {"type": "brush_end", "expr": "min(brush_start.y, brush.y)"}
           ]
         },
         {
@@ -114,7 +166,8 @@
           "init": 1e6,
           "streams": [
             {"type": "delta", "expr": "ys.max + (ys.max-ys.min)*delta.y/height"},
-            {"type": "zoom", "expr": "(ys.max-yAnchor)*zoom + yAnchor"}
+            {"type": "zoom", "expr": "(ys.max-yAnchor)*zoom + yAnchor"},
+            {"type": "brush_end", "expr": "max(brush_start.y, brush.y)"}
           ]
         }
       ],
@@ -200,6 +253,24 @@
               }
             }
           ]
+        },
+        {
+          "type": "rect",
+          "properties": {
+            "enter": {
+              "fill": {"value": "grey"},
+              "fillOpacity": {"value": 0.05},
+              "stroke": {"value": "grey"},
+              "strokeOpacity": {"value": 0.6},
+              "strokeDash": {"value": [4,6]},
+            },
+            "update": {
+              "x": {"scale": "x", "signal": "brush1.x"},
+              "x2": {"scale": "x", "signal": "brush2.x"},
+              "y": {"scale": "y", "signal": "brush1.y"},
+              "y2": {"scale": "y", "signal": "brush2.y"}
+            }
+          }
         }
       ]
     };
