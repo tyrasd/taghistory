@@ -162,8 +162,8 @@
           "name": "xMin",
           "init": osmBirth,
           "streams": [
-            {"type": "delta", "expr": "max(+datetime(xs.min + (xs.max-xs.min)*delta.x/width), "+osmBirth+")"},
-            {"type": "zoom", "expr": "max(+datetime((xs.min-xAnchor)*zoom + xAnchor), "+osmBirth+")"},
+            {"type": "delta", "expr": "max(xs.min + (xs.max-xs.min)*delta.x/width, "+osmBirth+")"},
+            {"type": "zoom", "expr": "max((xs.min-xAnchor)*zoom + xAnchor, "+osmBirth+")"},
             {"type": "brush_end", "expr": "min(brush_start.x, brush.x)"},
             {"type": "reset", "expr": osmBirth}
           ]
@@ -172,8 +172,8 @@
           "name": "xMax",
           "init": today,
           "streams": [
-            {"type": "delta", "expr": "min(+datetime(xs.max + (xs.max-xs.min)*delta.x/width), "+today+")"},
-            {"type": "zoom", "expr": "min(+datetime((xs.max-xAnchor)*zoom + xAnchor), "+today+")"},
+            {"type": "delta", "expr": "min(xs.max + (xs.max-xs.min)*delta.x/width, "+today+")"},
+            {"type": "zoom", "expr": "min((xs.max-xAnchor)*zoom + xAnchor, "+today+")"},
             {"type": "brush_end", "expr": "max(brush_start.x, brush.x)"},
             {"type": "reset", "expr": today}
           ]
