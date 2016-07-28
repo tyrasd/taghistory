@@ -31,12 +31,29 @@
       ],
       "signals": [
         {
+          "name": "reset",
+          "verbose": true,
+          "streams": [{
+            "type": "@reset:click",
+            "expr": "random()"
+          }]
+        },
+        {
+          "name": "resetable",
+          "init": 0,
+          "verbose": true,
+          "streams": [
+            {"type": "reset", "expr": 0},
+            {"type": "brush_end, delta, zoom", "expr": 1}
+          ]
+        },
+        {
           "name": "shift",
           "init": false,
           "verbose": true,
           "streams": [
-            {"type": "window:keydown, window:keyup", "expr": "event.shiftKey"
-          }]
+            {"type": "window:keydown, window:keyup", "expr": "event.shiftKey"}
+          ]
         },
         {
           "name": "brush_start",
@@ -140,7 +157,8 @@
           "streams": [
             {"type": "delta", "expr": "max(+datetime(xs.min + (xs.max-xs.min)*delta.x/width), "+osmBirth+")"},
             {"type": "zoom", "expr": "max(+datetime((xs.min-xAnchor)*zoom + xAnchor), "+osmBirth+")"},
-            {"type": "brush_end", "expr": "min(brush_start.x, brush.x)"}
+            {"type": "brush_end", "expr": "min(brush_start.x, brush.x)"},
+            {"type": "reset", "expr": osmBirth}
           ]
         },
         {
@@ -149,7 +167,8 @@
           "streams": [
             {"type": "delta", "expr": "min(+datetime(xs.max + (xs.max-xs.min)*delta.x/width), "+today+")"},
             {"type": "zoom", "expr": "min(+datetime((xs.max-xAnchor)*zoom + xAnchor), "+today+")"},
-            {"type": "brush_end", "expr": "max(brush_start.x, brush.x)"}
+            {"type": "brush_end", "expr": "max(brush_start.x, brush.x)"},
+            {"type": "reset", "expr": today}
           ]
         },
         {
@@ -158,7 +177,8 @@
           "streams": [
             {"type": "delta", "expr": "max(0, ys.min + (ys.max-ys.min)*delta.y/height)"},
             {"type": "zoom", "expr": "max(0, (ys.min-yAnchor)*zoom + yAnchor)"},
-            {"type": "brush_end", "expr": "min(brush_start.y, brush.y)"}
+            {"type": "brush_end", "expr": "min(brush_start.y, brush.y)"},
+            {"type": "reset", "expr": 0}
           ]
         },
         {
@@ -167,7 +187,8 @@
           "streams": [
             {"type": "delta", "expr": "ys.max + (ys.max-ys.min)*delta.y/height"},
             {"type": "zoom", "expr": "(ys.max-yAnchor)*zoom + yAnchor"},
-            {"type": "brush_end", "expr": "max(brush_start.y, brush.y)"}
+            {"type": "brush_end", "expr": "max(brush_start.y, brush.y)"},
+            {"type": "reset", "expr": 1e6}
           ]
         }
       ],
@@ -271,7 +292,21 @@
               "y2": {"scale": "y", "signal": "brush2.y"}
             }
           }
-        }
+        },
+        {
+          "type": "text",
+          "name": "reset",
+          "properties": {
+            "update": {
+              "text": {"value": "(reset zoom)"},
+              "x": {"value": 30},
+              "y": {"value": 30},
+              "fill": {"value": "grey"},
+              "fillOpacity": {"signal": "resetable"},
+              "fontSize": {"value": 14}
+            }
+          }
+        },
       ]
     };
 
