@@ -1,7 +1,9 @@
-History of OSM tag usage
-========================
+OSM Tag Usage Analysis
+======================
 
 Generates graphs of the usage of arbitrary [OSM](//osm.org) [tags](//wiki.openstreetmap.org/wiki/Tags) over time (with daily granularity) by number of OSM objects.
+
+<img src="https://wiki.openstreetmap.org/w/images/a/a6/Highway%3Dford_vs_ford%3Dyes.svg" width="700">
 
 Warning: The output is (currently) only given in terms of numbers (counts) of OSM objects! Similarly to some of the statistics produced by [taginfo](//taginfo.openstreetmap.org), it is subject to the same limitations, most notably the effect that one cannot directly compare the number of tags used for different linear and polygonal features such as roads, land cover, etc. because such features are typically divided up into many OSM objects of different sizes. For example, an existing road may be divided up into two pieces when a new turn restrictions is added, resulting in that the count of each of the tags used on the road (even obsolete ones) is increased by one in the OSM database. That means that one needs to pay close attention when comparing tags that are typically used on such features, even when one's comparing subtags that are typically used on the same kind of parent object (e.g. different values of the `highway` tag).
 
