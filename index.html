@@ -322,27 +322,35 @@
       view.update();
     });
 
+    function getAPILink(type, key, value, format) {
+      var link = "http://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
+      if (format !== undefined) {
+        link += '?format='+format
+      }
+      return link
+    }
+
     document.getElementById('form').addEventListener('submit', function(e) {
       e.preventDefault();
       var type  = document.getElementById('type').value;
       var key   = document.getElementById('key').value;
       var value = document.getElementById('value').value;
-      var encodedTag = encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
-      fetch("http://taghistory.raifer.tech/"+encodedTag)
+      var tagDescription = type+"/"+key+"/"+value;
+      fetch(getAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
         d.forEach(function(r) {
-          r.tag = encodedTag;
+          r.tag = tagDescription;
           r.date = +(new Date(r.date));
         });
         d.unshift({
-          tag: encodedTag,
+          tag: tagDescription,
           date: osmBirth,
           delta: 0,
           count: 0
         });
         d.push({
-          tag: encodedTag,
+          tag: tagDescription,
           date: today,
           delta: 0,
           count: d[d.length-1].count
