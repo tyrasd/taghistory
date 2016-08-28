@@ -17,11 +17,13 @@ This data is then stored into an sqlite database and is exposed by a simple REST
 API
 ---
 
-### `GET /<type>/<key>/<value>`
+### `GET /<type>/<key>/<value>[?format=<format>]`
 
 Gets the osm object count history for the given tag (`key`, `value`) of the given OSM object type (`type`). `type` can be `***` to search for any object type.
 
 Returns a JSON array of objects containing `date`, `delta` and `count` fields indicating the net change (`delta`) of the respective tag usage on a particular `date`. `count` contains a running cummulative sum of the object counts for convenience.
+
+The optional GET-parameter `format` can be one of `json` (default value if omitted, see the example below) or `csv` for a downloadable csv file.
 
 Example: `http://taghistory.raifer.tech/relation/amenity/drinking_water`
 
