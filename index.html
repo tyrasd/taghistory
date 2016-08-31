@@ -11,7 +11,7 @@
       <option value="node">nodes only</option>
       <option value="way">ways only</option>
       <option value="relation">relations only</option>
-    </select>
+    </select>d
     <input type="text" id="key" placeholder="key" maxlength="255" />
     <input type="text" id="value" placeholder="value" maxlength="255" />
     <input type="submit" value="add tag" />
@@ -335,7 +335,7 @@
       var type  = document.getElementById('type').value;
       var key   = document.getElementById('key').value;
       var value = document.getElementById('value').value;
-      var tagDescription = type+"/"+key+"/"+value;
+      var tagDescription = (type === '***' ? '' : type+' ')+key+(value ? '='+value : '');
       fetch(getAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
