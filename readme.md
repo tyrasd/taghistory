@@ -48,3 +48,5 @@ see also
 * [taginfo](https://github.com/joto/taginfo) – Brings together information about OpenStreetMap tags and makes it searchable and browsable
 * [osm-analytics](https://github.com/hotosm/osm-analytics) – Analyse interactively how and when specific OpenStreetMap features are mapped in specific regions
 * [*Stats* page](http://wiki.openstreetmap.org/wiki/Stats) on the OSM Wiki
+* various specialized and/or local stats keeper projects, for example [road km's in Italy](http://www.gfoss.it/osm/stat/), [Wochenaufgabe](http://blog.openstreetmap.de/blog/category/wochenaufgabe/)'s [OSM Count](http://thefive.sabic.uberspace.de/table/GuidePost_Node.html) (currently offline), [
+housenumber evaluation on regio-osm.de](http://regio-osm.de/hausnummerauswertung/theoretischeabdeckung.html), [Building coverage in Austria](https://osm-austria-building-coverage.thomaskonrad.at/)
