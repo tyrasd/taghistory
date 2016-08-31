@@ -36,6 +36,10 @@ Example: `http://taghistory.raifer.tech/relation/amenity/drinking_water`
 ]
 ```
 
+### `GET /<type>/<key>[?format=<format>]`
+
+Same as above, but matches any tag with the given key.
+
 todos
 -----
 
