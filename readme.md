@@ -1,7 +1,7 @@
 OSM Tag Usage Analysis
 ======================
 
-Generates graphs of the usage of arbitrary [OSM](//osm.org) [tags](//wiki.openstreetmap.org/wiki/Tags) over time (with daily granularity) by number of OSM objects.
+Generates graphs of the usage of arbitrary [OSM](//osm.org) [tags](//wiki.openstreetmap.org/wiki/Tags) over time (with daily granularity) by number of OSM objects. Read more about OSM tags and this tool in my blog [article](http://www.openstreetmap.org/user/tyr_asd/diary/39402).
 
 <img src="https://wiki.openstreetmap.org/w/images/a/a6/Highway%3Dford_vs_ford%3Dyes.svg" width="700">
 
