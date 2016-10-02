@@ -17,7 +17,7 @@ This data is then stored into an sqlite database and is exposed by a simple REST
 API
 ---
 
-Data returned from the taghistory API described below is available under the terms of the [ODbL 1.0](http://opendatacommons.org/licenses/odbl/1.0/) license.
+Data returned from the taghistory API described below is available under the terms of the [ODbL 1.0](http://opendatacommons.org/licenses/odbl/1.0/) license and copyright © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 ### `GET /<type>/<key>/<value>[?format=<format>]`
 
