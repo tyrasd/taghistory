@@ -17,6 +17,8 @@ This data is then stored into an sqlite database and is exposed by a simple REST
 API
 ---
 
+Data returned from the taghistory API described below is available under the terms of the [ODbL 1.0](http://opendatacommons.org/licenses/odbl/1.0/) license.
+
 ### `GET /<type>/<key>/<value>[?format=<format>]`
 
 Gets the osm object count history for the given tag (`key`, `value`) of the given OSM object type (`type`). `type` can be `***` to search for any object type.
