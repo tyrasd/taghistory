@@ -384,11 +384,25 @@
       });
     })
 
+    function exportImage(format) {
+      var resetableValue = view.signal('resetable');
+      if (resetableValue != 0) {
+        view.signal('resetable', 0);
+        view.update();
+      }
+      var imageResult = view.toImageURL(format);
+      if (resetableValue != 0) {
+        view.signal('resetable', resetableValue);
+        view.update();
+      }
+      return imageResult;
+    }
+
   </script>
   <p>
     download graph as
-    <a href="#" download="taghistory.svg" onmousedown="this.href=view.toImageURL('svg')">svg</a> /
-    <a href="#" download="taghistory.png" onmousedown="this.href=view.toImageURL('png')">png</a>
+    <a href="#" download="taghistory.svg" onmousedown="this.href=exportImage('svg')">svg</a> /
+    <a href="#" download="taghistory.png" onmousedown="this.href=exportImage('png')">png</a>
   </p>
   <p>
     Data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (<a href="http://opendatacommons.org/licenses/odbl/1.0/">ODbL</a>).
