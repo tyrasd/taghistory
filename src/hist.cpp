@@ -83,7 +83,7 @@ struct CountHandler : public osmium::handler::Handler {
 int main(int argc, char* argv[]) {
 
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " OSMFILE\n";
+        std::cerr << "Usage: " << argv[0] << " OSMFILE.pbf\n";
         exit(1);
     }
 

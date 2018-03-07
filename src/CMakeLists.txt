@@ -1,12 +1,14 @@
+set (CMAKE_CXX_FLAGS "-std=c++11")
+
 project(taghistory)
 
-add_executable(osmium
+add_executable(taghistory
     hist.cpp
     ${OSMIUM_SOURCE_FILES}
 )
 
-target_link_libraries(osmium ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})
+target_link_libraries(taghistory ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})
 
-set_pthread_on_target(osmium)
+set_pthread_on_target(taghistory)
 
-install(TARGETS osmium DESTINATION bin)
+install(TARGETS taghistory DESTINATION bin)
