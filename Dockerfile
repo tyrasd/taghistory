@@ -57,10 +57,14 @@ RUN mkdir taghistory/build && \
     make install && \
     rm -rf build
 
+# add tini so our executable obeys signal calls and we can exit
+ENV TINI_VERSION v0.17.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+
 # /mount is a the same directory the Dockerfile is contained within
 # so you can do something like:
     # docker run -it --mount type=bind,source="$(pwd)",target=/mount taghistory california.pbf
 # and it should work seamlessly
-
 WORKDIR /mount
-ENTRYPOINT ["taghistory"]
+ENTRYPOINT ["/tini", "--", "taghistory"]
