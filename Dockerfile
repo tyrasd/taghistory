@@ -1,28 +1,32 @@
-FROM ubuntu:16.04
+FROM alpine:3.7
 
 # docker build -t taghistory . 
 # docker run -it --name taghistory --mount type=bind,source="$(pwd)",target=/mount taghistory
 
 # install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     cmake \
     curl \
     doxygen \
     g++ \
     git \
     graphviz \
-    libboost-dev \
-    libbz2-dev \
-    libexpat1-dev \
-    libgdal-dev \
-    libgeos++-dev \
-    libproj-dev \
-    libsparsehash-dev \
+    boost-dev \
+    bzip2-dev \
+    expat-dev \
     make \
     ruby \
     ruby-json \
-    spatialite-bin \
-    zlib1g-dev \
+    sparsehash \
+    zlib-dev
+
+# in the testing repo
+RUN apk add --no-cache \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    gdal-dev \
+    geos-dev \
+    proj4-dev \
+    libspatialite \
     && rm -rf /var/lib/apt/lists/*
 
 # download and build protozero
