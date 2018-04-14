@@ -7,44 +7,31 @@ FROM alpine:3.7
 RUN apk add --no-cache \
     cmake \
     curl \
-    doxygen \
     g++ \
-    git \
-    graphviz \
     boost-dev \
     bzip2-dev \
     expat-dev \
     make \
-    ruby \
-    ruby-json \
     sparsehash \
-    zlib-dev
-
-# in the testing repo
-RUN apk add --no-cache \
-    --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \
-    gdal-dev \
-    geos-dev \
-    proj4-dev \
-    libspatialite \
+    zlib-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # download and build protozero
 WORKDIR /root
 RUN curl -LO https://github.com/mapbox/protozero/archive/v1.6.1.zip && \
-    unzip v1.6.1.zip && \
+    unzip -q v1.6.1.zip && \
     rm -rf v1.6.1.zip && \
     cd /root/protozero-1.6.1 && \
     mkdir build && \
     cd build && \
-    cmake .. && \
+    cmake -DCMAKE_BUILD_TYPE=MinSizeRel .. && \
     make && \
     make install
 
 # download libosmium, doesn't require building
 WORKDIR /root
 RUN curl -LO https://github.com/osmcode/libosmium/archive/v2.13.1.zip && \
-    unzip v2.13.1.zip && \
+    unzip -q v2.13.1.zip && \
     rm -rf v2.13.1.zip && \
     mv /root/libosmium-2.13.1 /root/libosmium
 
@@ -59,7 +46,9 @@ RUN mkdir taghistory/build && \
     cmake .. && \
     make && \
     make install && \
-    rm -rf build
+    rm -rf build && \
+    rm -rf /root/protozero-1.6.1 && \
+    rm -rf /root/libosmium-2.13.1
 
 # add tini so our executable obeys signal calls and we can exit
 ENV TINI_VERSION v0.17.0
