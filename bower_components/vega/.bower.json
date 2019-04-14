@@ -37,15 +37,14 @@
     "src",
     "test"
   ],
-  "version": "2.6.1",
-  "_release": "2.6.1",
+  "version": "2.6.5",
+  "_release": "2.6.5",
   "_resolution": {
     "type": "version",
-    "tag": "v2.6.1",
-    "commit": "2b468e8cf7454ccd687c5e6e1017d18e21c48579"
+    "tag": "v2.6.5",
+    "commit": "1ac99f97e687d809ed1a69ecb85cf2de96c9b49b"
   },
   "_source": "https://github.com/vega/vega.git",
-  "_target": "^2.6.1",
-  "_originalSource": "vega",
-  "_direct": true
+  "_target": "^2.6.5",
+  "_originalSource": "vega"
 }
