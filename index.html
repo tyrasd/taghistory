@@ -22,8 +22,9 @@
   </form>
   <div id="chart" class="view"></div>
   <script>
-    //var today = +(new Date());
-    var today = +(new Date("2017-01-15T23:59:59Z"));
+    var today = +(new Date());
+    var dataUpdateTags = +(new Date("2018-06-12T23:59:59Z"));
+    var dataUpdateTagKeys = +(new Date("2019-02-16T23:59:59Z"));
     var osmBirth = +(new Date("2007-10-07T00:00:00Z"));
     var spec = {
       "width": 1000,
@@ -32,6 +33,11 @@
       "data": [
         {
           "name": "tags",
+          "values": [],
+          "transform": [{"type": "facet", "groupby": ["tag"]}]
+        },
+        {
+          "name": "taginfo",
           "values": [],
           "transform": [{"type": "facet", "groupby": ["tag"]}]
         }
@@ -285,6 +291,38 @@
           ]
         },
         {
+          "type": "group",
+          "properties": {
+            "enter": {
+              "x": {"value": 0},
+              "width": {"field": {"group": "width"}},
+              "y": {"value": 0},
+              "height": {"field": {"group": "height"}},
+              "clip": {"value": true}
+            }
+          },
+          "from": {
+            "data": "taginfo"
+          },
+          "marks": [
+            {
+              "type": "line",
+              "properties": {
+                "enter": {
+                  "interpolate": {"value": "linear"},
+                  "strokeWidth": 12
+                },
+                "update": {
+                  "x": {"scale": "x", "field": "date"},
+                  "y": {"scale": "y", "field": "count"},
+                  "stroke": {"scale": "color", "field": "tag"},
+                  "strokeDash": {"value": [4,4]}
+                }
+              }
+            }
+          ]
+        },
+        {
           "type": "rect",
           "properties": {
             "enter": {
@@ -342,12 +380,21 @@
       view.update();
     });
 
-    function getAPILink(type, key, value, format) {
-      var link = "http://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
+    function getTaghistoryAPILink(type, key, value, format) {
+      var link = "https://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
       if (format !== undefined) {
-        link += '?format='+format
+        link += '?format='+format;
       }
-      return link
+      return link;
+    }
+
+    function getTaginfoAPILink(key, value) {
+      var link;
+      if (value)
+        link = "https://taginfo.openstreetmap.org/api/4/tag/stats?key="+encodeURIComponent(key)+"&value="+encodeURIComponent(value);
+      else
+        link = "https://taginfo.openstreetmap.org/api/4/key/stats?key="+encodeURIComponent(key);
+      return link;
     }
 
     document.getElementById('form').addEventListener('submit', function(e) {
@@ -356,7 +403,7 @@
       var key   = document.getElementById('key').value;
       var value = document.getElementById('value').value;
       var tagDescription = (type === '***' ? '' : type+' ')+key+(value ? '='+value : '');
-      fetch(getAPILink(type, key, value))
+      fetch(getTaghistoryAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
         d.forEach(function(r) {
@@ -369,11 +416,12 @@
           delta: 0,
           count: 0
         });
+        var lastCount = d[d.length-1].count;
         d.push({
           tag: tagDescription,
-          date: today,
+          date: value ? dataUpdateTags : dataUpdateTagKeys,
           delta: 0,
-          count: d[d.length-1].count
+          count: lastCount
         });
         view.data('tags').insert(d);
         var newMax = d.reduce(function(acc, r) { return Math.max(acc,r.count); }, 0);
@@ -381,8 +429,29 @@
         // trigger chart reset if it hasn't been zoomed yet
         if (view.signal('resetable') == 0) view.signal('reset', Math.random());
         view.update();
-      });
-    })
+
+
+        fetch(getTaginfoAPILink(key, value))
+        .then(function(d) { return d.json(); })
+        .then(function(d) { return d.data.filter(function(e) {
+          return e.type === (type === '***' ? 'all' : type + 's');
+        })[0].count; })
+        .then(function(taginfoCount) {
+          var d = [{
+            tag: tagDescription,
+            date: value ? dataUpdateTags : dataUpdateTagKeys,
+            count: lastCount
+          }, {
+            tag: tagDescription,
+            date: today,
+            count: taginfoCount
+          }];
+          view.data('taginfo').insert(d);
+          view.update();
+        })
+      })
+      .catch(function(error) { console.error(error); });
+    });
 
     function exportImage(format) {
       var resetableValue = view.signal('resetable');
