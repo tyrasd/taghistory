@@ -397,11 +397,10 @@
       return link;
     }
 
-    document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var type  = document.getElementById('type').value;
-      var key   = document.getElementById('key').value;
-      var value = document.getElementById('value').value;
+    var plotElements = "";
+
+    function addToPlot(type,key,value) {
+      plotElements += type+","+key+","+value+";";
       var tagDescription = (type === '***' ? '' : type+' ')+key+(value ? '='+value : '');
       fetch(getTaghistoryAPILink(type, key, value))
       .then(function(d) { return d.json(); })
@@ -451,7 +450,7 @@
         })
       })
       .catch(function(error) { console.error(error); });
-    });
+    }
 
     function exportImage(format) {
       var resetableValue = view.signal('resetable');
@@ -466,12 +465,55 @@
       }
       return imageResult;
     }
+    
+    function loadFromHash() {
+      if (document.location.hash == "") {
+        return;
+      }
+      var elements_to_add = document.location.hash.split("#")[1].split(";");
+      for(i=0;i<elements_to_add.length;i++) {
+        // defend against trailing semicolon/multiple semicolons
+        if (elements_to_add[i].length == 0) {
+          continue;
+        }
+        var tkv = elements_to_add[i].split(",");
+        // treat empty type as "***"
+        var t = (tkv[0] == "" ? "***" : tkv[0]);
+        // key must be given and is used as-is
+        var k = tkv[1];
+        // treat missing value as no value
+        var v = (tkv.length == 3 ? tkv[2] : "")
+        //console.log("t="+t+",k="+k+",v="+v);
+        addToPlot(t,k,v);
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+      loadFromHash();
+	  
+	  document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var type  = document.getElementById('type').value;
+      var key   = document.getElementById('key').value;
+      var value = document.getElementById('value').value;
+      addToPlot(type,key,value);
+      });
+	
+      document.getElementById('permalink').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.location.hash = plotElements;
+      });
+
+    });
 
   </script>
   <p>
     download graph as
     <a href="#" download="taghistory.svg" onmousedown="this.href=exportImage('svg')">svg</a> /
     <a href="#" download="taghistory.png" onmousedown="this.href=exportImage('png')">png</a>
+  </p>
+  <p>
+    <a href="#" id="permalink">permalink</a>
   </p>
   <p>
     Data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (<a href="http://opendatacommons.org/licenses/odbl/1.0/">ODbL</a>).
