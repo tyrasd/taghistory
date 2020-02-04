@@ -465,7 +465,7 @@
       }
       return imageResult;
     }
-    
+
     function loadFromHash() {
       if (document.location.hash == "") {
         return;
@@ -487,18 +487,18 @@
         addToPlot(t,k,v);
       }
     }
-    
+
     document.addEventListener("DOMContentLoaded", function() {
       loadFromHash();
-	  
-	  document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var type  = document.getElementById('type').value;
-      var key   = document.getElementById('key').value;
-      var value = document.getElementById('value').value;
-      addToPlot(type,key,value);
+
+      document.getElementById('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var type  = document.getElementById('type').value;
+        var key   = document.getElementById('key').value;
+        var value = document.getElementById('value').value;
+        addToPlot(type,key,value);
       });
-	
+  
       document.getElementById('permalink').addEventListener('click', function(e) {
         e.preventDefault();
         document.location.hash = plotElements;
