@@ -51,6 +51,7 @@ todos
 see also
 --------
 
+* [ohsome dashboard](https://ohsome.org/apps/dashboard) – Provides detailed statistics about the historical development of OpenStreetMap data
 * [taginfo](https://github.com/joto/taginfo) – Brings together information about OpenStreetMap tags and makes it searchable and browsable
 * [osm-analytics](https://github.com/hotosm/osm-analytics) – Analyse interactively how and when specific OpenStreetMap features are mapped in specific regions
 * [*Stats* page](http://wiki.openstreetmap.org/wiki/Stats) on the OSM Wiki
