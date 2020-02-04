@@ -430,7 +430,7 @@
         var permalinkPart = type + "," + key + "," + value + ";";
         var permalinkElement = document.getElementById('permalink');
         permalinkElement.href += permalinkPart;
-
+        window.history.replaceState(null, "", permalinkElement.href);
 
         fetch(getTaginfoAPILink(key, value))
         .then(function(d) { return d.json(); })
