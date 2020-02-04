@@ -26,6 +26,8 @@
     var dataUpdateTags = +(new Date("2018-06-12T23:59:59Z"));
     var dataUpdateTagKeys = +(new Date("2019-02-16T23:59:59Z"));
     var osmBirth = +(new Date("2007-10-07T00:00:00Z"));
+    var permalinkTagSeparator = ";";
+    var permalinkRequestSeparator = ",";
     var spec = {
       "width": 1000,
       "height": 600,
@@ -427,7 +429,7 @@
         view.update();
 
         // update permalink
-        var permalinkPart = type + "," + key + "," + value + ";";
+        var permalinkPart = type + permalinkRequestSeparator + key + permalinkRequestSeparator + value + permalinkTagSeparator;
         var permalinkElement = document.getElementById('permalink');
         permalinkElement.href += permalinkPart;
         window.history.replaceState(null, "", permalinkElement.href);
@@ -477,8 +479,8 @@
       if (hash == "") {
         return;
       }
-      var tagsFromHash = hash.split(";");
-      var tkv = tagsFromHash.shift().split(",");
+      var tagsFromHash = hash.split(permalinkTagSeparator);
+      var tkv = tagsFromHash.shift().split(permalinkRequestSeparator);
       // treat empty type as "***"
       var type  = tkv[0] == "" ? "***" : tkv[0];
       // key must be given and is used as-is
@@ -487,7 +489,7 @@
       var value = tkv.length == 3 ? tkv[2] : "";
       addToPlot(type, key, value, function() {
         // recursively call addToPlot for further tags, if any
-        loadFromHash(tagsFromHash.join(";"));
+        loadFromHash(tagsFromHash.join(permalinkTagSeparator));
       });
     }
 
