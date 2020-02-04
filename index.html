@@ -399,9 +399,9 @@
 
     var plotElements = "";
 
-    function addToPlot(type,key,value) {
-      plotElements += type+","+key+","+value+";";
-      var tagDescription = (type === '***' ? '' : type+' ')+key+(value ? '='+value : '');
+    function addToPlot(type, key, value) {
+      plotElements += type + "," + key + "," + value + ";";
+      var tagDescription = (type === '***' ? '' : type + ' ') + key + (value ? '=' + value : '');
       fetch(getTaghistoryAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
@@ -471,20 +471,19 @@
         return;
       }
       var elements_to_add = document.location.hash.split("#")[1].split(";");
-      for(i=0;i<elements_to_add.length;i++) {
+      for(i = 0; i < elements_to_add.length; i++) {
         // defend against trailing semicolon/multiple semicolons
         if (elements_to_add[i].length == 0) {
           continue;
         }
         var tkv = elements_to_add[i].split(",");
         // treat empty type as "***"
-        var t = (tkv[0] == "" ? "***" : tkv[0]);
+        var type  = tkv[0] == "" ? "***" : tkv[0];
         // key must be given and is used as-is
-        var k = tkv[1];
+        var key   = tkv[1];
         // treat missing value as no value
-        var v = (tkv.length == 3 ? tkv[2] : "")
-        //console.log("t="+t+",k="+k+",v="+v);
-        addToPlot(t,k,v);
+        var value = tkv.length == 3 ? tkv[2] : "";
+        addToPlot(type, key, value);
       }
     }
 
@@ -496,9 +495,9 @@
         var type  = document.getElementById('type').value;
         var key   = document.getElementById('key').value;
         var value = document.getElementById('value').value;
-        addToPlot(type,key,value);
+        addToPlot(type, key, value);
       });
-  
+
       document.getElementById('permalink').addEventListener('click', function(e) {
         e.preventDefault();
         document.location.hash = plotElements;
