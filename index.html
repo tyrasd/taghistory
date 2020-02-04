@@ -429,8 +429,12 @@
         view.update();
 
         // update permalink
-        var permalinkPart = type + permalinkRequestSeparator + key + permalinkRequestSeparator + value + permalinkTagSeparator;
+        var permalinkPart = permalinkTagSeparator + type + permalinkRequestSeparator + key + permalinkRequestSeparator + value;
         var permalinkElement = document.getElementById('permalink');
+        if (permalinkElement.href.substr(-1) == '#') {
+          // skip separator for first tag in permalink
+          permalinkPart = permalinkPart.substring(1);
+        }
         permalinkElement.href += permalinkPart;
         window.history.replaceState(null, "", permalinkElement.href);
 
