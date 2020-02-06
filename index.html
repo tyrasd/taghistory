@@ -26,6 +26,8 @@
     var dataUpdateTags = +(new Date("2018-06-12T23:59:59Z"));
     var dataUpdateTagKeys = +(new Date("2019-02-16T23:59:59Z"));
     var osmBirth = +(new Date("2007-10-07T00:00:00Z"));
+    var permalinkTagSeparator = "&";
+    var permalinkRequestSeparator = "/";
     var spec = {
       "width": 1000,
       "height": 600,
@@ -397,12 +399,8 @@
       return link;
     }
 
-    document.getElementById('form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var type  = document.getElementById('type').value;
-      var key   = document.getElementById('key').value;
-      var value = document.getElementById('value').value;
-      var tagDescription = (type === '***' ? '' : type+' ')+key+(value ? '='+value : '');
+    function addToPlot(type, key, value, doneCallback) {
+      var tagDescription = (type === '***' ? '' : type + ' ') + key + (value ? '=' + value : '');
       fetch(getTaghistoryAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
@@ -430,6 +428,20 @@
         if (view.signal('resetable') == 0) view.signal('reset', Math.random());
         view.update();
 
+        // update permalink
+        var permalinkPart = permalinkTagSeparator + type + permalinkRequestSeparator + key + permalinkRequestSeparator + value;
+        var permalinkElement = document.getElementById('permalink');
+        if (permalinkElement.href.substr(-1) == '#') {
+          // skip separator for first tag in permalink
+          permalinkPart = permalinkPart.substring(1);
+        }
+        permalinkElement.href += permalinkPart;
+        window.history.replaceState(null, "", permalinkElement.href);
+
+        // trigger doneCallback
+        if (doneCallback !== undefined) {
+          doneCallback.call();
+        }
 
         fetch(getTaginfoAPILink(key, value))
         .then(function(d) { return d.json(); })
@@ -451,7 +463,7 @@
         })
       })
       .catch(function(error) { console.error(error); });
-    });
+    }
 
     function exportImage(format) {
       var resetableValue = view.signal('resetable');
@@ -467,11 +479,44 @@
       return imageResult;
     }
 
+    function loadFromHash(hash) {
+      if (hash == "") {
+        return;
+      }
+      var tagsFromHash = hash.split(permalinkTagSeparator);
+      var tkv = tagsFromHash.shift().split(permalinkRequestSeparator);
+      // treat empty type as "***"
+      var type  = tkv[0] == "" ? "***" : tkv[0];
+      // key must be given and is used as-is
+      var key   = tkv[1];
+      // treat missing value as no value
+      var value = tkv.length == 3 ? tkv[2] : "";
+      addToPlot(type, key, value, function() {
+        // recursively call addToPlot for further tags, if any
+        loadFromHash(tagsFromHash.join(permalinkTagSeparator));
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadFromHash(document.location.hash.substring(1));
+
+      document.getElementById('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var type  = document.getElementById('type').value;
+        var key   = document.getElementById('key').value;
+        var value = document.getElementById('value').value;
+        addToPlot(type, key, value);
+      });
+    });
+
   </script>
   <p>
     download graph as
     <a href="#" download="taghistory.svg" onmousedown="this.href=exportImage('svg')">svg</a> /
     <a href="#" download="taghistory.png" onmousedown="this.href=exportImage('png')">png</a>
+  </p>
+  <p>
+    <a href="#" id="permalink">permalink</a>
   </p>
   <p>
     Data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> (<a href="http://opendatacommons.org/licenses/odbl/1.0/">ODbL</a>).
