@@ -377,10 +377,6 @@
     };
 
     var view;
-    vg.parse.spec(spec, function(chart) {
-      view = chart({el:"#chart", renderer: 'svg', data:[]});
-      view.update();
-    });
 
     function getTaghistoryAPILink(type, key, value, format) {
       var link = "https://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
@@ -498,14 +494,19 @@
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-      loadFromHash(document.location.hash.substring(1));
+      vg.parse.spec(spec, function(chart) {
+        view = chart({el:"#chart", renderer: 'svg', data:[]});
+        view.update();
+        
+        loadFromHash(document.location.hash.substring(1));
 
-      document.getElementById('form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var type  = document.getElementById('type').value;
-        var key   = document.getElementById('key').value;
-        var value = document.getElementById('value').value;
-        addToPlot(type, key, value);
+        document.getElementById('form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          var type  = document.getElementById('type').value;
+          var key   = document.getElementById('key').value;
+          var value = document.getElementById('value').value;
+          addToPlot(type, key, value);
+        });
       });
     });
 
