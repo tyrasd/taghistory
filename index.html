@@ -39,7 +39,12 @@
           "transform": [{"type": "facet", "groupby": ["tag"]}]
         },
         {
-          "name": "taginfo",
+          "name": "taginfo_chronology",
+          "values": [],
+          "transform": [{"type": "facet", "groupby": ["tag"]}]
+        },
+        {
+          "name": "taginfo_stats",
           "values": [],
           "transform": [{"type": "facet", "groupby": ["tag"]}]
         }
@@ -304,7 +309,38 @@
             }
           },
           "from": {
-            "data": "taginfo"
+            "data": "taginfo_chronology"
+          },
+          "marks": [
+            {
+              "type": "line",
+              "properties": {
+                "enter": {
+                  "interpolate": {"value": "step-after"},
+                  "strokeWidth": 12
+                },
+                "update": {
+                  "x": {"scale": "x", "field": "date"},
+                  "y": {"scale": "y", "field": "count"},
+                  "stroke": {"scale": "color", "field": "tag"}
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "properties": {
+            "enter": {
+              "x": {"value": 0},
+              "width": {"field": {"group": "width"}},
+              "y": {"value": 0},
+              "height": {"field": {"group": "height"}},
+              "clip": {"value": true}
+            }
+          },
+          "from": {
+            "data": "taginfo_stats"
           },
           "marks": [
             {
@@ -386,12 +422,21 @@
       return link;
     }
 
-    function getTaginfoAPILink(key, value) {
+    function getTaginfoStatsAPILink(key, value) {
       var link;
       if (value)
         link = "https://taginfo.openstreetmap.org/api/4/tag/stats?key="+encodeURIComponent(key)+"&value="+encodeURIComponent(value);
       else
         link = "https://taginfo.openstreetmap.org/api/4/key/stats?key="+encodeURIComponent(key);
+      return link;
+    }
+
+    function getTaginfoChronologyAPILink(key, value) {
+      var link;
+      if (value)
+        link = "https://taginfo.openstreetmap.org/api/4/tag/chronology?key="+encodeURIComponent(key)+"&value="+encodeURIComponent(value);
+      else
+        link = "https://taginfo.openstreetmap.org/api/4/key/chronology?key="+encodeURIComponent(key);
       return link;
     }
 
@@ -411,6 +456,7 @@
           count: 0
         });
         var lastCount = d[d.length-1].count;
+        var lastDay = d[d.length-1].date;
         d.push({
           tag: tagDescription,
           date: value ? dataUpdateTags : dataUpdateTagKeys,
@@ -439,24 +485,83 @@
           doneCallback.call();
         }
 
-        fetch(getTaginfoAPILink(key, value))
+        var taginfoDataUntil;
+        fetch(getTaginfoChronologyAPILink(key, value))
         .then(function(d) { return d.json(); })
-        .then(function(d) { return d.data.filter(function(e) {
-          return e.type === (type === '***' ? 'all' : type + 's');
-        })[0].count; })
-        .then(function(taginfoCount) {
-          var d = [{
+        .then(function(d) {
+          taginfoDataUntil = +(new Date(d.data_until));
+          if (d.total === 0) {
+            fetch(getTaginfoStatsAPILink(key, value))
+            .then(function(d) { return d.json(); })
+            .then(function(d) { return d.data.filter(function(e) {
+              return e.type === (type === '***' ? 'all' : type + 's');
+            })[0].count; })
+            .then(function(taginfoCount) {
+              var d = [{
+                tag: tagDescription,
+                date: value ? dataUpdateTags : dataUpdateTagKeys,
+                count: lastCount
+              }, {
+                tag: tagDescription,
+                date: taginfoDataUntil,
+                count: taginfoCount
+              }];
+              view.data('taginfo_stats').insert(d);
+              view.signal('globalMaxY', Math.max(taginfoCount*1.05, view.signal('globalMaxY')));
+              // trigger chart reset if it hasn't been zoomed yet
+              if (view.signal('resetable') == 0) view.signal('reset', Math.random());
+              view.update();
+            });
+          }
+          return d;
+        })
+        .then(function(d) { return d.data.map(function(e) {
+          if (type !== '***')
+            return {
+              tag: tagDescription,
+              date: +(new Date(e.date + "T00:00:00.000Z")),
+              delta: e[type + 's']
+            };
+          else
+            return {
+              tag: tagDescription,
+              date: +(new Date(e.date + "T00:00:00.000Z")),
+              delta: e.nodes + e.ways + e.relations
+            };
+        }); })
+        .then(function(d) {
+          var count = 0;
+          d.forEach(function(e) {
+            count += e.delta;
+            e.count = count;
+          });
+          return d;
+        })
+        .then(function(d) { return d.filter(function(e) {
+          return e.date > lastDay;
+        }); })
+        .then(function(taginfoChronology) {
+          if (taginfoChronology.length == 0) return;
+          taginfoChronology.unshift({
             tag: tagDescription,
-            date: value ? dataUpdateTags : dataUpdateTagKeys,
+            date: lastDay,
+            delta: 0,
             count: lastCount
-          }, {
+          });
+          taginfoChronology.push({
             tag: tagDescription,
-            date: today,
-            count: taginfoCount
-          }];
-          view.data('taginfo').insert(d);
+            date: taginfoDataUntil,
+            delta: 0,
+            count: taginfoChronology[taginfoChronology.length-1].count
+          });
+          view.data('taginfo_chronology').insert(taginfoChronology);
+          var newMax = taginfoChronology.reduce(function(acc, r) { return Math.max(acc,r.count); }, 0);
+          view.signal('globalMaxY', Math.max(newMax*1.05, view.signal('globalMaxY')));
+          // trigger chart reset if it hasn't been zoomed yet
+          if (view.signal('resetable') == 0) view.signal('reset', Math.random());
           view.update();
         })
+        .catch(function(error) { console.error(error); });
       })
       .catch(function(error) { console.error(error); });
     }
@@ -497,7 +602,7 @@
       vg.parse.spec(spec, function(chart) {
         view = chart({el:"#chart", renderer: 'svg', data:[]});
         view.update();
-        
+
         loadFromHash(document.location.hash.substring(1));
 
         document.getElementById('form').addEventListener('submit', function(e) {
