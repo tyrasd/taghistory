@@ -17,6 +17,8 @@ This data is then stored into an sqlite database and is exposed by a simple REST
 API
 ---
 
+> Taghistory's own API is quite limited and currently not updated regularly. Please consider using an alternative like the <a href="https://taginfo.openstreetmap.org/taginfo/apidoc">Taginfo chronology API</a> or the <a href="https://api.ohsome.org">ohsome API</a> instead.
+
 Data returned from the taghistory API described below is available under the terms of the [ODbL 1.0](http://opendatacommons.org/licenses/odbl/1.0/) license and copyright © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
 ### `GET /<type>/<key>/<value>[?format=<format>]`
