@@ -52,7 +52,7 @@ see also
 --------
 
 * [ohsome dashboard](https://ohsome.org/apps/dashboard) – Provides detailed statistics about the historical development of OpenStreetMap data
-* [taginfo](https://github.com/joto/taginfo) – Brings together information about OpenStreetMap tags and makes it searchable and browsable
+* [taginfo](https://github.com/joto/taginfo) – Brings together information about OpenStreetMap tags and makes it searchable and browsable, as of November 2020 it also provides a [tag chronology](https://blog.jochentopf.com/2020-11-08-10-years-of-taginfo.html) tab.
 * [osm-analytics](https://github.com/hotosm/osm-analytics) – Analyse interactively how and when specific OpenStreetMap features are mapped in specific regions
 * [*Stats* page](http://wiki.openstreetmap.org/wiki/Stats) on the OSM Wiki
 * various specialized and/or local stats keeper projects, for example [road km's in Italy](http://www.gfoss.it/osm/stat/), [Wochenaufgabe](http://blog.openstreetmap.de/blog/category/wochenaufgabe/)'s [OSM Count](http://thefive.sabic.uberspace.de/table/GuidePost_Node.html) (currently offline), [
