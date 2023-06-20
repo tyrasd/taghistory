@@ -590,9 +590,9 @@
       // treat empty type as "***"
       var type  = tkv[0] == "" ? "***" : tkv[0];
       // key must be given and is used as-is
-      var key   = tkv[1];
+      var key   = decodeURIComponent(tkv[1]);
       // treat missing value as no value
-      var value = tkv.length == 3 ? tkv[2] : "";
+      var value = tkv.length == 3 ? decodeURIComponent(tkv[2]) : "";
       addToPlot(type, key, value, function() {
         // recursively call addToPlot for further tags, if any
         loadFromHash(tagsFromHash.join(permalinkTagSeparator));
