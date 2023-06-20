@@ -487,11 +487,13 @@
         }
 
         var taginfoDataUntil;
+        var taginfoHasChronology = true;
         fetch(getTaginfoChronologyAPILink(key, value))
         .then(function(d) { return d.json(); })
         .then(function(d) {
           taginfoDataUntil = +(new Date(d.data_until));
           if (d.total === 0) {
+            taginfoHasChronology = false;
             fetch(getTaginfoStatsAPILink(key, value))
             .then(function(d) { return d.json(); })
             .then(function(d) { return d.data.filter(function(e) {
@@ -542,7 +544,7 @@
           return e.date > lastDay;
         }); })
         .then(function(taginfoChronology) {
-          if (taginfoChronology.length == 0) return;
+          if (!taginfoHasChronology) return;
           taginfoChronology.unshift({
             tag: tagDescription,
             date: lastDay,
