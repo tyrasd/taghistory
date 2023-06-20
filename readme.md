@@ -10,7 +10,7 @@ Warning: The output is (currently) only given in terms of numbers (counts) of OS
 Technicalities
 --------------
 
-A simple osmium script (see [`/backend/`](https://github.com/tyrasd/taghistory/tree/master/backend)) scans through a planet history dump and aggregates daily net differences of all used tags by osm object type (node/way/relation). This takes care of created and deleted objects as well as tag modifications in between different versions of an object.
+A simple osmium script (see [`/src/`](https://github.com/tyrasd/taghistory/tree/master/src)) scans through a planet history dump and aggregates daily net differences of all used tags by osm object type (node/way/relation). This takes care of created and deleted objects as well as tag modifications in between different versions of an object.
 
 This data is then stored into an sqlite database and is exposed by a simple REST API.
 
@@ -43,6 +43,16 @@ Example: `http://taghistory.raifer.tech/relation/amenity/drinking_water`
 ### `GET /<type>/<key>[?format=<format>]`
 
 Same as above, but matches any tag with the given key.
+
+Docker Image
+----
+A taghistory Docker image can be built from source and executed as a task to automatically install dependencies and allow taghistory to run on any system supported by Docker.
+
+```docker
+$ docker build -t taghistory .
+# -- download a pbf into the taghistory directory
+$ docker run -it --mount type=bind,source="$(pwd)",target=/mount taghistory <your pbf>
+```
 
 todos
 -----
