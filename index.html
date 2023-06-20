@@ -415,7 +415,8 @@
     var view;
 
     function getTaghistoryAPILink(type, key, value, format) {
-      var link = "https://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+encodeURIComponent(key)+"/"+encodeURIComponent(value);
+      var keyPart = encodeURIComponent(key.replace(/\//g, '|||')) || '||@||';
+      var link = "https://taghistory.raifer.tech/"+encodeURIComponent(type)+"/"+keyPart+"/"+encodeURIComponent(value.replace(/\//g, '|||'));
       if (format !== undefined) {
         link += '?format='+format;
       }
