@@ -446,12 +446,14 @@
       fetch(getTaghistoryAPILink(type, key, value))
       .then(function(d) { return d.json(); })
       .then(function(d) {
+        var permalinkPart = type + permalinkRequestSeparator + encodeURIComponent(key) + permalinkRequestSeparator + encodeURIComponent(value);
         d.forEach(function(r) {
           r.tag = tagDescription;
           r.date = +(new Date(r.date));
         });
         d.unshift({
           tag: tagDescription,
+          permalinkPart: permalinkPart,
           date: osmBirth,
           delta: 0,
           count: 0
@@ -472,13 +474,11 @@
         view.update();
 
         // update permalink
-        var permalinkPart = permalinkTagSeparator + type + permalinkRequestSeparator + key + permalinkRequestSeparator + value;
+        var permalinkHash = view.data().tags.map(function(d) {
+          return d.values[0].permalinkPart;
+        }).join(permalinkTagSeparator);
         var permalinkElement = document.getElementById('permalink');
-        if (permalinkElement.href.substr(-1) == '#') {
-          // skip separator for first tag in permalink
-          permalinkPart = permalinkPart.substring(1);
-        }
-        permalinkElement.href += permalinkPart;
+        permalinkElement.href = permalinkElement.href.substring(0, permalinkElement.href.indexOf('#')) + '#' + permalinkHash;
         window.history.replaceState(null, "", permalinkElement.href);
 
         // trigger doneCallback
@@ -599,7 +599,7 @@
       });
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+    function loadGraphs() {
       vg.parse.spec(spec, function(chart) {
         view = chart({el:"#chart", renderer: 'svg', data:[]});
         view.update();
@@ -614,8 +614,10 @@
           addToPlot(type, key, value);
         });
       });
-    });
+    }
 
+    document.addEventListener("DOMContentLoaded", loadGraphs);
+    window.addEventListener("hashchange", loadGraphs);
   </script>
   <p>
     download graph as
